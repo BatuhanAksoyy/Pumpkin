@@ -40,6 +40,7 @@ mod time;
 mod title;
 mod transfer;
 mod weather;
+mod tellraw;
 mod worldborder;
 
 #[must_use]
@@ -76,6 +77,7 @@ pub fn default_dispatcher() -> CommandDispatcher {
     dispatcher.register(gamemode::init_command_tree(), PermissionLvl::Two);
     dispatcher.register(stopsound::init_command_tree(), PermissionLvl::Two);
     dispatcher.register(defaultgamemode::init_command_tree(), PermissionLvl::Two);
+    dispatcher.register(tellraw::init_command_tree(), PermissionLvl::Two);
     // Three
     dispatcher.register(op::init_command_tree(), PermissionLvl::Three);
     dispatcher.register(deop::init_command_tree(), PermissionLvl::Three);

@@ -36,7 +36,7 @@ pub struct TextComponentBase {
 impl TextComponentBase {
     pub fn to_pretty_console(self) -> String {
         let mut text = match self.content {
-            TextContent::Text { text } => text.into_owned(),
+            TextContent::Text { text, .. } => text.into_owned(),
             TextContent::Translate { translate, with } => {
                 let translate = translate.into_owned();
                 get_translation_en_us(&translate, with)
@@ -85,7 +85,20 @@ impl TextComponent {
         P: Into<Cow<'static, str>>,
     {
         Self(TextComponentBase {
-            content: TextContent::Text { text: plain.into() },
+            content: TextContent::Text {
+                text: plain.into(),
+                color: None,
+                bold: None,
+                italic: None,
+                underlined: None,
+                strikethrough: None,
+                obfuscated: None,
+                insertion: None,
+                click_event: None,
+                hover_event: None,
+                font: None,
+                shadow_color: None,
+            },
             style: Style::default(),
             extra: vec![],
         })
@@ -113,8 +126,61 @@ impl TextComponent {
 
     pub fn from_content(content: TextContent) -> Self {
         Self(TextComponentBase {
-            content,
-            style: Style::default(),
+            content: content.clone(),
+            style: if let TextContent::Text {
+                color,
+                bold,
+                italic,
+                underlined,
+                strikethrough,
+                obfuscated,
+                insertion,
+                click_event,
+                hover_event,
+                font,
+                shadow_color,
+                ..
+            } = content
+            {
+                let mut style = Style::default();
+                if let Some(color) = color {
+                    style = style.color(color);
+                }
+                if let Some(insertion) = insertion {
+                    style = style.insertion(insertion);
+                }
+                if let Some(hover_event) = hover_event {
+                    style = style.hover_event(hover_event);
+                }
+                if let Some(font) = font {
+                    style = style.font(font);
+                }
+                if let Some(shadow_color) = shadow_color {
+                    style = style.shadow_color(shadow_color);
+                }
+                if let Some(click_event) = click_event {
+                    style = style.click_event(click_event);
+                }
+                if bold.is_some() {
+                    style = style.bold();
+                }
+                if italic.is_some() {
+                    style = style.italic();
+                }
+                if underlined.is_some() {
+                    style = style.underlined();
+                }
+                if strikethrough.is_some() {
+                    style = style.strikethrough();
+                }
+                if obfuscated.is_some() {
+                    style = style.obfuscated();
+                }
+
+                style
+            } else {
+                Style::default()
+            },
             extra: vec![],
         })
     }
@@ -124,7 +190,20 @@ impl TextComponent {
         P: Into<Cow<'static, str>>,
     {
         self.0.extra.push(TextComponentBase {
-            content: TextContent::Text { text: text.into() },
+            content: TextContent::Text {
+                text: text.into(),
+                color: None,
+                bold: None,
+                italic: None,
+                underlined: None,
+                strikethrough: None,
+                obfuscated: None,
+                insertion: None,
+                click_event: None,
+                hover_event: None,
+                font: None,
+                shadow_color: None,
+            },
             style: Style::default(),
             extra: vec![],
         });
@@ -133,7 +212,7 @@ impl TextComponent {
 
     pub fn get_text(self) -> String {
         match self.0.content {
-            TextContent::Text { text } => text.into_owned(),
+            TextContent::Text { text, .. } => text.into_owned(),
             TextContent::Translate { translate, with } => {
                 let translate = translate.into_owned();
                 get_translation_en_us(&translate, with)
@@ -244,7 +323,44 @@ impl TextComponent {
 #[serde(untagged)]
 pub enum TextContent {
     /// Raw Text
-    Text { text: Cow<'static, str> },
+    Text {
+        text: Cow<'static, str>,
+        /// Changes the color to render the content
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        color: Option<Color>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        bold: Option<bool>,
+        /// Whether to render the content in italic.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        italic: Option<bool>,
+        /// Whether to render the content in underlined.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        underlined: Option<bool>,
+        /// Whether to render the content in strikethrough.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        strikethrough: Option<bool>,
+        /// Whether to render the content in obfuscated.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        obfuscated: Option<bool>,
+        /// When the text is shift-clicked by a player, this string is inserted in their chat input. It does not overwrite any existing text the player was writing. This only works in chat messages
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        insertion: Option<String>,
+        /// Allows for events to occur when the player clicks on text. Only work in chat.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        click_event: Option<ClickEvent>,
+        /// Allows for a tooltip to be displayed when the player hovers their mouse over text.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        hover_event: Option<HoverEvent>,
+        /// Allows you to change the font of the text.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        font: Option<String>,
+        #[serde(
+            default,
+            skip_serializing_if = "Option::is_none",
+            rename = "shadow_color"
+        )]
+        shadow_color: Option<ARGBColor>,
+    },
     /// Translated text
     Translate {
         translate: Cow<'static, str>,

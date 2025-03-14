@@ -27,9 +27,29 @@ impl ArgumentConsumer for TextComponentArgConsumer {
         _server: &'a Server,
         args: &mut RawArgs<'a>,
     ) -> Option<Arg<'a>> {
-        let s = args.pop()?;
+        let s = if args.len() > 1 && args.last()?.starts_with('{') && args.first()?.ends_with('}') {
+            let mut s = String::new();
+            let mut end = "";
+            for arg in args.iter() {
+                if arg.starts_with('{') {
+                    s.insert_str(0, arg);
+                } else if arg.ends_with('}') {
+                    end = arg;
+                } else {
+                    s.push(' ');
+                    s.push_str(arg);
+                }
+            }
+            s.push(' ');
+            s.push_str(end);
 
-        let text_component = parse_text_component(s);
+            args.clear();
+            s
+        } else {
+            args.pop()?.to_string()
+        };
+
+        let text_component = parse_text_component(&s);
 
         let Some(text_component) = text_component else {
             if s.starts_with('"') && s.ends_with('"') {
