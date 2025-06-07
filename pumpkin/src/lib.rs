@@ -19,9 +19,11 @@ use std::{
     net::SocketAddr,
     sync::{Arc, LazyLock},
 };
+use tokio::net::TcpListener;
 use tokio::select;
+#[cfg(feature = "dhat-heap")]
+use tokio::sync::Mutex;
 use tokio::sync::{Notify, RwLock};
-use tokio::{net::TcpListener, sync::Mutex};
 use tokio_util::task::TaskTracker;
 
 pub mod block;
@@ -41,14 +43,24 @@ const GIT_VERSION: &str = env!("GIT_VERSION");
 pub static HEAP_PROFILER: LazyLock<Mutex<Option<dhat::Profiler>>> =
     LazyLock::new(|| Mutex::new(None));
 
-pub static PLUGIN_MANAGER: LazyLock<Mutex<PluginManager>> =
-    LazyLock::new(|| Mutex::new(PluginManager::new()));
+pub static PLUGIN_MANAGER: LazyLock<Arc<RwLock<PluginManager>>> = LazyLock::new(|| {
+    let manager = PluginManager::new();
+    let arc_manager = Arc::new(RwLock::new(manager));
+    let clone = Arc::clone(&arc_manager);
+    let arc_manager_clone = arc_manager.clone();
+    let mut manager = futures::executor::block_on(arc_manager_clone.write());
+    manager.set_self_ref(clone);
+    arc_manager
+});
 
 pub static PERMISSION_REGISTRY: LazyLock<Arc<RwLock<PermissionRegistry>>> =
     LazyLock::new(|| Arc::new(RwLock::new(PermissionRegistry::new())));
 
-pub static PERMISSION_MANAGER: LazyLock<RwLock<PermissionManager>> =
-    LazyLock::new(|| RwLock::new(PermissionManager::new(PERMISSION_REGISTRY.clone())));
+pub static PERMISSION_MANAGER: LazyLock<Arc<RwLock<PermissionManager>>> = LazyLock::new(|| {
+    Arc::new(RwLock::new(PermissionManager::new(
+        PERMISSION_REGISTRY.clone(),
+    )))
+});
 
 /// A wrapper for our logger to hold the terminal input while no input is expected in order to
 /// properly flush logs to the output while they happen instead of batched
@@ -264,14 +276,23 @@ impl PumpkinServer {
     }
 
     pub async fn init_plugins(&self) {
-        let mut loader_lock = PLUGIN_MANAGER.lock().await;
+        let mut loader_lock = PLUGIN_MANAGER.write().await;
         loader_lock.set_server(self.server.clone());
         if let Err(err) = loader_lock.load_plugins().await {
             log::error!("{err}");
         };
     }
 
-    pub async fn start(self) {
+    pub async fn unload_plugins(&self) {
+        let mut loader_lock = PLUGIN_MANAGER.write().await;
+        if let Err(err) = loader_lock.unload_all_plugins().await {
+            log::error!("Error unloading plugins: {err}");
+        } else {
+            log::info!("All plugins unloaded successfully");
+        }
+    }
+
+    pub async fn start(&self) {
         let mut master_client_id: usize = 0;
         let tasks = TaskTracker::new();
 
@@ -374,6 +395,8 @@ impl PumpkinServer {
 
         tasks.close();
         tasks.wait().await;
+
+        self.unload_plugins().await;
 
         log::info!("Starting save.");
 

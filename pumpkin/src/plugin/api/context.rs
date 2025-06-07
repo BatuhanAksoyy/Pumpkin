@@ -1,12 +1,15 @@
 use std::{fs, path::Path, sync::Arc};
 
-use crate::{PERMISSION_MANAGER, PERMISSION_REGISTRY, command::client_suggestions};
-use pumpkin_util::{PermissionLvl, permission::Permission};
+use crate::command::client_suggestions;
+use pumpkin_util::{
+    PermissionLvl,
+    permission::{Permission, PermissionManager},
+};
 use tokio::sync::RwLock;
 
 use crate::{
     entity::player::Player,
-    plugin::{EventHandler, HandlerMap, TypedEventHandler},
+    plugin::{EventHandler, HandlerMap, PluginManager, TypedEventHandler},
     server::Server,
 };
 
@@ -22,7 +25,9 @@ use super::{Event, EventPriority, PluginMetadata};
 pub struct Context {
     metadata: PluginMetadata<'static>,
     pub server: Arc<Server>,
-    handlers: Arc<RwLock<HandlerMap>>,
+    pub handlers: Arc<RwLock<HandlerMap>>,
+    pub plugin_manager: Arc<RwLock<PluginManager>>,
+    pub permission_manager: Arc<RwLock<PermissionManager>>,
 }
 impl Context {
     /// Creates a new instance of `Context`.
@@ -39,11 +44,15 @@ impl Context {
         metadata: PluginMetadata<'static>,
         server: Arc<Server>,
         handlers: Arc<RwLock<HandlerMap>>,
+        plugin_manager: Arc<RwLock<PluginManager>>,
+        permission_manager: Arc<RwLock<PermissionManager>>,
     ) -> Self {
         Self {
             metadata,
             server,
             handlers,
+            plugin_manager,
+            permission_manager,
         }
     }
 
@@ -131,13 +140,14 @@ impl Context {
             ));
         }
 
-        let mut registry = PERMISSION_REGISTRY.write().await;
+        let manager = self.permission_manager.read().await;
+        let mut registry = manager.registry.write().await;
         registry.register_permission(permission)
     }
 
     /// Check if a player has a permission
     pub async fn player_has_permission(&self, player_uuid: &uuid::Uuid, permission: &str) -> bool {
-        let permission_manager = PERMISSION_MANAGER.read().await;
+        let permission_manager = self.permission_manager.read().await;
 
         // If the player isn't online, we need to find their op level
         let player_op_level = (self.server.get_player_by_uuid(*player_uuid).await)
@@ -182,5 +192,38 @@ impl Context {
             _phantom: std::marker::PhantomData,
         };
         handlers_vec.push(Box::new(typed_handler));
+    }
+
+    /// Registers a custom plugin loader that can load additional plugin types.
+    ///
+    /// This method allows plugins to extend the server with support for loading
+    /// plugins in different formats (e.g., Lua, JavaScript, Python). When a new
+    /// loader is registered, the plugin manager will automatically attempt to load
+    /// any previously unloadable files in the plugins directory with this new loader.
+    ///
+    /// # Arguments
+    /// - `loader`: The custom plugin loader implementation to register.
+    ///
+    /// # Returns
+    /// `true` if new plugins were loaded as a result of registering this loader, `false` otherwise.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// // Create and register a custom Lua plugin loader
+    /// let lua_loader = Arc::new(LuaPluginLoader::new());
+    /// context.register_plugin_loader(lua_loader).await;
+    /// ```
+    pub async fn register_plugin_loader(
+        &self,
+        loader: Arc<dyn crate::plugin::loader::PluginLoader>,
+    ) -> bool {
+        let mut manager = self.plugin_manager.write().await;
+        let before_count = manager.loaded_plugins().len();
+        manager.add_loader(loader).await;
+        let after_count = manager.loaded_plugins().len();
+
+        // Return true if any new plugins were loaded
+        after_count > before_count
     }
 }

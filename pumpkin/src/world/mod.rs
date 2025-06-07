@@ -1235,11 +1235,7 @@ impl World {
             .color_named(NamedColor::Yellow);
             let event = PlayerJoinEvent::new(player.clone(), msg_comp);
 
-            let event = PLUGIN_MANAGER
-                .lock()
-                .await
-                .fire::<PlayerJoinEvent>(event)
-                .await;
+            let event = PLUGIN_MANAGER.read().await.fire(event).await;
 
             if !event.cancelled {
                 let current_players = current_players.clone();
@@ -1292,11 +1288,7 @@ impl World {
             .color_named(NamedColor::Yellow);
             let event = PlayerLeaveEvent::new(player.clone(), msg_comp);
 
-            let event = PLUGIN_MANAGER
-                .lock()
-                .await
-                .fire::<PlayerLeaveEvent>(event)
-                .await;
+            let event = PLUGIN_MANAGER.read().await.fire(event).await;
 
             if !event.cancelled {
                 let players = self.players.read().await;
@@ -1505,7 +1497,7 @@ impl World {
         let event = BlockBreakEvent::new(cause.clone(), broken_block.clone(), *position, 0, false);
 
         let event = PLUGIN_MANAGER
-            .lock()
+            .read()
             .await
             .fire::<BlockBreakEvent>(event)
             .await;
