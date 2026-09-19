@@ -16,6 +16,7 @@ members = [
     "crates/pumpkin-plugin-runtime",
     "crates/pumpkin-plugin-utils",
     "crates/pumpkin-protocol",
+    "crates/pumpkin-tui",
     "crates/pumpkin-util",
     "crates/pumpkin-host-bindings",
     "crates/pumpkin-world",
@@ -166,6 +167,14 @@ flate2 = { version = "1.1.10", default-features = false, features = ["rust_backe
 heck = { version = "0.5", default-features = false }
 hmac = { version = "=0.13.0", default-features = false }
 indexmap = { version = "2.14", default-features = false, features = ["std"] }
+# Defaults minus `macros`, which the console does not use.
+ratatui = { version = "0.30.2", default-features = false, features = [
+    "all-widgets",
+    "crossterm",
+    "layout-cache",
+    "underline-color",
+] }
+unicode-width = "0.2.2"
 itertools = { version = "0.15.0", default-features = false, features = ["use_std"] }
 libc = { version = "0.2", default-features = false }
 libloading = { version = "0.9", default-features = false, features = ["std"] }
@@ -194,7 +203,7 @@ pumpkin-protocol = { path = "crates/pumpkin-protocol", default-features = false 
 pumpkin-util = { path = "crates/pumpkin-util", default-features = false }
 pumpkin-host-bindings = { path = "crates/pumpkin-host-bindings", default-features = false }
 pumpkin-world = { path = "crates/pumpkin-world", default-features = false }
-pumpkin-tui = { path = "../pumpkin-tui" }
+pumpkin-tui = { path = "crates/pumpkin-tui" }
 quote = { version = "1.0", default-features = false, features = ["proc-macro"] }
 rand = { version = "0.10.2", default-features = false, features = ["std", "std_rng", "thread_rng"] }
 rsa = { version = "=0.10.0-rc.18", default-features = false, features = ["std", "encoding"] }
