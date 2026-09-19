@@ -152,7 +152,14 @@ impl CommandSender {
     pub fn send_message(&self, text: TextComponent) {
         match self {
             #[allow(clippy::print_stdout)]
-            Self::Console => println!("{}", text.to_pretty_console()),
+            Self::Console => {
+                let message = text.to_pretty_console();
+                // The full-screen console has to render replies itself; writing
+                // to stdout would draw over its UI.
+                if !crate::console::reply(&message) {
+                    println!("{message}");
+                }
+            }
             Self::Player(c) => c.send_system_message(&text),
             Self::Rcon(s) => s
                 .lock()

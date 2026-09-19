@@ -231,6 +231,11 @@ fn handle_interrupt() {
 }
 
 fn handle_panic(panic_info: &PanicHookInfo<'_>) {
+    // A panic anywhere outside the console thread would otherwise print the
+    // crash report into a terminal the console still owns (raw mode, alternate
+    // screen). Give the terminal back first; this is a no-op without the TUI.
+    pumpkin::console::restore_terminal();
+
     // Generate a crash report.
     let crash_report = {
         // We capture the backtraces here, and not in the

@@ -16,7 +16,7 @@ members = [
     "crates/pumpkin-plugin-runtime",
     "crates/pumpkin-plugin-utils",
     "crates/pumpkin-protocol",
-    "crates/pumpkin-util", 
+    "crates/pumpkin-util",
     "crates/pumpkin-host-bindings",
     "crates/pumpkin-world",
     "tools/pumpkin-codegen",
@@ -194,6 +194,7 @@ pumpkin-protocol = { path = "crates/pumpkin-protocol", default-features = false 
 pumpkin-util = { path = "crates/pumpkin-util", default-features = false }
 pumpkin-host-bindings = { path = "crates/pumpkin-host-bindings", default-features = false }
 pumpkin-world = { path = "crates/pumpkin-world", default-features = false }
+pumpkin-tui = { path = "../pumpkin-tui" }
 quote = { version = "1.0", default-features = false, features = ["proc-macro"] }
 rand = { version = "0.10.2", default-features = false, features = ["std", "std_rng", "thread_rng"] }
 rsa = { version = "=0.10.0-rc.18", default-features = false, features = ["std", "encoding"] }

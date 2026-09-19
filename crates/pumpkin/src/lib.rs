@@ -51,6 +51,7 @@ use tracing_subscriber::util::SubscriberInitExt;
 
 pub mod block;
 pub mod command;
+pub mod console;
 pub mod crash;
 pub mod data;
 pub mod enchantment;
@@ -113,6 +114,29 @@ pub fn init_logger(advanced_config: &AdvancedConfiguration) {
                 }
             }
         };
+
+        let logging_config = LoggingConfig {
+            color: advanced_config.logging.color,
+            threads: advanced_config.logging.threads,
+            thread_ids: advanced_config.logging.thread_ids,
+            target: advanced_config.logging.target,
+            timestamp: advanced_config.logging.timestamp,
+        };
+
+        // The full-screen console owns the terminal, so log records go to its
+        // log pane instead of stdout. Everything else (the file logger, the
+        // level filter) is unchanged.
+        if console::wanted(advanced_config) {
+            let registry = tracing_subscriber::registry()
+                .with(env_filter)
+                .with(console::init(advanced_config));
+            if let Some(file_logger) = file_logger {
+                registry.with(file_logger).init();
+            } else {
+                registry.init();
+            }
+            return (ReadlineLogWrapper::new(None), level, logging_config);
+        }
 
         let (logger, rl): (
             ConsoleWriter,
@@ -187,14 +211,6 @@ pub fn init_logger(advanced_config: &AdvancedConfiguration) {
                 registry.init();
             }
         }
-
-        let logging_config = LoggingConfig {
-            color: advanced_config.logging.color,
-            threads: advanced_config.logging.threads,
-            thread_ids: advanced_config.logging.thread_ids,
-            target: advanced_config.logging.target,
-            timestamp: advanced_config.logging.timestamp,
-        };
 
         (ReadlineLogWrapper::new(rl), level, logging_config)
     });
@@ -451,6 +467,7 @@ impl PumpkinServer {
 
     pub async fn start(&self) {
         if self.server.advanced_config.commands.use_console
+            && !console::start(&self.server)
             && let Some((wrapper, _, _)) = LOGGER_IMPL.wait()
         {
             if let Some(rl) = wrapper.take_readline() {
@@ -537,6 +554,9 @@ impl PumpkinServer {
         self.server.shutdown().await;
 
         info!("Completed save!");
+
+        // Let the operator read the shutdown log, then hand the terminal back.
+        console::shutdown();
 
         if let Some((wrapper, _, _)) = LOGGER_IMPL.wait()
             && let Some(rl) = wrapper.take_readline()

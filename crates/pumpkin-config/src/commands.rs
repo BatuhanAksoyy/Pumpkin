@@ -14,6 +14,10 @@ pub struct CommandsConfig {
     pub use_console: bool,
     /// Whether to use rusty line for tty input.
     pub use_tty: bool,
+    /// Whether to draw the full-screen console UI (`pumpkin-tui`) instead of
+    /// the plain readline prompt. Requires `use_tty`-style TTY input; falls
+    /// back to the readline console when stdin is not a terminal.
+    pub use_tui: bool,
     /// Whether commands from players are logged in the console.
     pub log_console: bool,
     /// Whether console and RCON command output is broadcast to online operators.
@@ -49,6 +53,7 @@ impl Default for CommandsConfig {
             use_console: true,
             log_console: true,
             use_tty: true,
+            use_tui: false,
             broadcast_console_to_ops: true,
             default_op_level: PermissionLvl::Zero,
             overrides: HashMap::new(),

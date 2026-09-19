@@ -346,8 +346,16 @@ where
     }
 }
 
+/// Pulls the `message` field out of a `tracing` event.
 #[derive(Default)]
-struct StringVisitor(String);
+pub(crate) struct StringVisitor(String);
+
+impl StringVisitor {
+    /// The formatted message, or an empty string for an event without one.
+    pub(crate) fn message(&self) -> &str {
+        &self.0
+    }
+}
 
 impl tracing::field::Visit for StringVisitor {
     fn record_debug(&mut self, field: &tracing::field::Field, value: &dyn std::fmt::Debug) {
