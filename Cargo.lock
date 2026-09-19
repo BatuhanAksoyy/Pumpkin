@@ -3819,7 +3819,7 @@ dependencies = [
 
 [[package]]
 name = "pumpkin"
-version = "0.1.0+26.2-26.51"
+version = "0.1.0+26.3-26.51"
 dependencies = [
  "aes 0.9.3",
  "arc-swap",
@@ -3894,7 +3894,7 @@ dependencies = [
 
 [[package]]
 name = "pumpkin-api-macros"
-version = "0.1.0+26.2-26.51"
+version = "0.1.0+26.3-26.51"
 dependencies = [
  "proc-macro-error2",
  "proc-macro2",
@@ -3904,7 +3904,7 @@ dependencies = [
 
 [[package]]
 name = "pumpkin-auth"
-version = "0.1.0+26.2-26.51"
+version = "0.1.0+26.3-26.51"
 dependencies = [
  "base64 0.23.1",
  "crypto-bigint 0.7.5",
@@ -3924,7 +3924,7 @@ dependencies = [
 
 [[package]]
 name = "pumpkin-codecs"
-version = "0.1.0+26.2-26.51"
+version = "0.1.0+26.3-26.51"
 dependencies = [
  "serde_json",
  "tracing",
@@ -3952,7 +3952,7 @@ dependencies = [
 
 [[package]]
 name = "pumpkin-command"
-version = "0.1.0+26.2-26.51"
+version = "0.1.0+26.3-26.51"
 dependencies = [
  "pumpkin-codecs",
  "pumpkin-data",
@@ -3967,7 +3967,7 @@ dependencies = [
 
 [[package]]
 name = "pumpkin-config"
-version = "0.1.0+26.2-26.51"
+version = "0.1.0+26.3-26.51"
 dependencies = [
  "pumpkin-util",
  "serde",
@@ -3978,7 +3978,7 @@ dependencies = [
 
 [[package]]
 name = "pumpkin-data"
-version = "0.1.0+26.2-26.51"
+version = "0.1.0+26.3-26.51"
 dependencies = [
  "crc-fast",
  "criterion",
@@ -3991,7 +3991,7 @@ dependencies = [
 
 [[package]]
 name = "pumpkin-fuzzer"
-version = "0.1.0+26.2-26.51"
+version = "0.1.0+26.3-26.51"
 dependencies = [
  "clap",
  "colored",
@@ -4001,7 +4001,7 @@ dependencies = [
 
 [[package]]
 name = "pumpkin-gametest"
-version = "0.1.0+26.2-26.51"
+version = "0.1.0+26.3-26.51"
 dependencies = [
  "async-trait",
  "pumpkin-data",
@@ -4016,14 +4016,14 @@ dependencies = [
 
 [[package]]
 name = "pumpkin-host-bindings"
-version = "0.1.0+26.2-26.51"
+version = "0.1.0+26.3-26.51"
 dependencies = [
  "wasmtime",
 ]
 
 [[package]]
 name = "pumpkin-inventory"
-version = "0.1.0+26.2-26.51"
+version = "0.1.0+26.3-26.51"
 dependencies = [
  "pumpkin-data",
  "pumpkin-nbt",
@@ -4037,7 +4037,7 @@ dependencies = [
 
 [[package]]
 name = "pumpkin-macros"
-version = "0.1.0+26.2-26.51"
+version = "0.1.0+26.3-26.51"
 dependencies = [
  "heck",
  "proc-macro-error2",
@@ -4048,7 +4048,7 @@ dependencies = [
 
 [[package]]
 name = "pumpkin-nbt"
-version = "0.1.0+26.2-26.51"
+version = "0.1.0+26.3-26.51"
 dependencies = [
  "bytes",
  "cesu8",
@@ -4063,7 +4063,7 @@ dependencies = [
 
 [[package]]
 name = "pumpkin-plugin-api"
-version = "0.1.0+26.2-26.51"
+version = "0.1.0+26.3-26.51"
 dependencies = [
  "postcard",
  "serde_json",
@@ -4074,7 +4074,7 @@ dependencies = [
 
 [[package]]
 name = "pumpkin-plugin-runtime"
-version = "0.1.0+26.2-26.51"
+version = "0.1.0+26.3-26.51"
 dependencies = [
  "futures",
  "thiserror 2.0.20",
@@ -4086,7 +4086,7 @@ dependencies = [
 
 [[package]]
 name = "pumpkin-plugin-utils"
-version = "0.1.0+26.2-26.51"
+version = "0.1.0+26.3-26.51"
 dependencies = [
  "pumpkin-plugin-api",
  "reqwest",
@@ -4101,7 +4101,7 @@ dependencies = [
 
 [[package]]
 name = "pumpkin-protocol"
-version = "0.1.0+26.2-26.51"
+version = "0.1.0+26.3-26.51"
 dependencies = [
  "aes 0.9.3",
  "async-compression",
@@ -4133,7 +4133,7 @@ dependencies = [
 
 [[package]]
 name = "pumpkin-util"
-version = "0.1.0+26.2-26.51"
+version = "0.1.0+26.3-26.51"
 dependencies = [
  "bytes",
  "colored",
@@ -4155,7 +4155,7 @@ dependencies = [
 
 [[package]]
 name = "pumpkin-world"
-version = "0.1.0+26.2-26.51"
+version = "0.1.0+26.3-26.51"
 dependencies = [
  "arc-swap",
  "bitflags 2.13.2",
